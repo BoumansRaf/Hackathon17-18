@@ -11,9 +11,32 @@ str = "47,Democratic,Law,Beard,Cancer,Extrovert"
 name="Filbert Hankerdoodle";
 
 
-
+fillTraining();
 
 function fillTraining(){
+  var output = [];
+  // Create the parser
+  var parser = parse();
+  // Use the writable stream api
+  parser.on('readable', function(){
+    while(record = parser.read()){
+      output.push(record);
+    }
+  });
+  // Catch any error
+  parser.on('error', function(err){
+    console.log(err.message);
+  });
+  // When we are done, test that the parsed output matched what expected
+  parser.on('finish', function(){
+    console.log(output);
+    console.log(ratings);
+    console.log(changeToVals(output));
+     output = changeToVals(output);
+    train(output);
+
+  });
+  // Now that setup is done, write data to the stream
 
 
   parser.write("51,Democratic,Law,Nothing,Aquarius,Extrovert\n");
@@ -39,6 +62,7 @@ function fillTraining(){
   parser.end();
 }
 
+function predictPres(){
   var output = [];
   // Create the parser
   var parser = parse();
@@ -54,6 +78,7 @@ function fillTraining(){
   });
   // When we are done, test that the parsed output matched what expected
   parser.on('finish', function(){
+    console.log(output);
     console.log(changeToVals(output));
      output = changeToVals(output);
      console.log(name);
@@ -63,11 +88,12 @@ function fillTraining(){
   // Now that setup is done, write data to the stream
   parser.write(str);
   parser.end();
+}
 
 ratings = ['yes', 'yes', 'yes', 'yes', 'yes', 'no', 'no', 'no', 'no','no','yes', 'yes','yes', 'yes','yes','no', 'no', 'no', 'no', 'no']
 function changeToVals(arr){
     for (var i = 0; i < arr.length; i++) {
-
+      arr[i][0] = parseInt(arr[i][0]);
 
     if (arr[i][1] === "Republican") {
       arr[i][1] = 0;
@@ -197,8 +223,7 @@ function train(output){
     "headers": {
       "authorization": "OreGaOchinchin:patje",
       "content-type": "application/json",
-      "cache-control": "no-cache",
-      "postman-token": "1d47817f-2066-4b0d-10bb-25dd992ebf3c"
+
     }
   };
 
@@ -214,7 +239,11 @@ function train(output){
       console.log(body.toString());
     });
   });
-
-  req.write(JSON.stringify({ training_data: output, labels: ratings }));
+ console.log(output);
+ console.log(ratings);
+var obj  = {"training_data": [[51,1,0,2,0,1], [57,2,2,2,0,0]], "labels": ["yes", "yes"]};
+console.log(obj);
+console.log(JSON.stringify(obj));
+  req.write(JSON.stringify(obj));
   req.end();
 }
